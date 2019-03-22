@@ -189,9 +189,6 @@ target_labels
 #perturbation = 0.03 #The amount to wiggle towards the gradient of target class.
 #steps = 500
 
-#Targeted attack using Fast gradient sign method inspired from http://blog.ycombinator.com/how-adversarial-attacks-work/
-# and http://karpathy.github.io/2015/03/30/breaking-convnets/
-
 def fgsm_f(input,perturbation = 0.03, steps = 500):
     img_gradient = tf.gradients(cross_entropy, x)[0]
     adversarial_images = input.copy()
@@ -407,7 +404,7 @@ def plot_3D_dict(input, input_dic, img_name='digit 0', class_label ='digit 0',n_
             path = save_path
             fig1.savefig(path + filename, bbox_inches='tight');
 
-save_img_path = "/home/thang/Downloads/images/results/MNIST/Feb-2019/From-6-to-9/"
+save_img_path = "../your_path/"
 plot_3D_dict(adversarial_img,translation_ori_probs_dict,fig_saving=1,save_path=save_img_path,n_images = 10)
 plot_3D_dict(adversarial_img,translation_tar_probs_dict,class_label ='digit 9',fig_saving=1,save_path=save_img_path)
 
@@ -425,8 +422,6 @@ img_gradient = tf.gradients(cross_entropy, x)[0]
 perturbation = 0.5 #The amount to wiggle towards the gradient of target class.
 steps = 20
 
-#Targeted attack using Fast gradient sign method inspired from http://blog.ycombinator.com/how-adversarial-attacks-work/
-# and http://karpathy.github.io/2015/03/30/breaking-convnets/
 adversarial_img = original_images.copy()
 for i in range(0, steps):
     gradient = img_gradient.eval({x: adversarial_img, y_: target_labels, keep_prob: 1.0})
@@ -673,7 +668,7 @@ prob_list_3 = multiple_rotation(adversarial_img,start_angle=0,end_angle=30,n_ima
 elapsedTime = time.time() - startTime
 print("elapsed Time: ", elapsedTime)
 
-save_img_path = '/home/thang/Downloads/images/results/MNIST/Feb-2019/From-6-to-9/rotation/'
+save_img_path = '../your_path/'
 
 plot_multi_rotation_prob(input=adversarial_img, probabilities_dict=prob_list, correct_class=original_number, img_name='Adverarial Image, targeted: 4',
                          n_images = number_images, save_path=save_img_path, start_angle=0, end_angle=30,fig_saving=1)
@@ -733,7 +728,7 @@ combination_prob_list_2 = multiple_rotation(translated_images_list,start_angle=0
 elapsedTime = time.time() - startTime
 elapsedTime
 
-save_img_path = '/home/thang/Downloads/images/results/MNIST/Feb-2019/From-0-to-4/combination/tx3-ty3/'
+save_img_path = '../your_path/'
 
 #plot_multi_rotation_prob(input=adversarial_img, probabilities_dict=combination_prob_list_2, correct_class=target_number,
 #                         img_name='Adverarial Image, targeted: 4', n_images = number_images, save_path=save_img_path, start_angle=0, end_angle=30,fig_saving=1)
