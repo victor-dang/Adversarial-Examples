@@ -1,7 +1,6 @@
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 import tensorflow.contrib.slim.nets as nets
-
 import tempfile
 from urllib.request import urlretrieve
 import tarfile
@@ -25,7 +24,7 @@ sess = tf.InteractiveSession(config=config)
 ########for GPU
 #tf.logging.set_verbosity(tf.logging.ERROR)
 #sess = tf.InteractiveSession()
-##############################################
+
 
 
 image = tf.Variable(tf.zeros((299, 299, 3)))
