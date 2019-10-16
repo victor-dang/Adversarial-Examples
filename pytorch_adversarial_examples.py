@@ -3,7 +3,7 @@
 from torchvision import transforms
 from PIL import Image
 import matplotlib.pyplot as plt
-img = Image.open('vjai_1.jpg')
+img = Image.open('mouse.jpg')
 
 preprocess = transforms.Compose([transforms.Resize((224,224),interpolation=Image.NEAREST),
                                  #transforms.Resize(256),
@@ -73,4 +73,75 @@ def plot_figure(input_img, predict, correct_class=None, target_class=None, pars=
 
     return predicted_id,predicted_probability
    
-  
+import math
+model = resnet152(pretrained=True)
+model.eval()
+pred = model(norm(img_tensor))
+predit_id = pred.max(dim=1)[1].item()
+loss = nn.CrossEntropyLoss()(model(norm(img_tensor)),torch.LongTensor([predit_id])).item()
+print('predict label: {}, loss: {:.5f}, probability: {:.2f}'.format(imagenet_classes[predit_id], loss,math.exp(-loss)))
+
+plot_figure(img_tensor, pred, correct_class=predit_id, target_class=111, pars=None, img_name='Image')
+import torch.optim as optim
+import copy
+epsilon = 4./255
+delta = torch.zeros_like(img_tensor, requires_grad=True)
+opt = optim.Adam([delta], lr=1e-1)
+input_img = copy.deepcopy(img_tensor)
+for i in range(100):
+    adv_pred = model(norm(input_img + delta))
+    loss = -nn.CrossEntropyLoss()(adv_pred, torch.LongTensor([predit_id]))
+    if i % 5 == 0:
+        print(i, -loss.item())
+    
+    opt.zero_grad()
+    loss.backward()
+    opt.step()
+    delta.data.clamp_(-epsilon, epsilon)
+adversarial_img = input_img + delta
+
+f, ax = plt.subplots(1,2,figsize=(20, 10))
+ax[0].imshow((img_tensor)[0].detach().numpy().transpose(1,2,0))
+ax[1].imshow((adversarial_img)[0].detach().numpy().transpose(1,2,0))
+
+print('Original class: ', imagenet_classes[predit_id])
+print('Original class probability: {}'.format(nn.Softmax(dim=1)(adv_pred)[0,predit_id].item()))
+new_adv_predict_id = adv_pred.max(dim=1)[1].item()
+print('New predict class: ', imagenet_classes[new_adv_predict_id])
+print('New predict class probability: ', nn.Softmax(dim=1)(adv_pred)[0, new_adv_predict_id].item())
+
+plot_figure(adversarial_img, adv_pred, correct_class=predit_id, target_class=new_adv_predict_id, pars=None, img_name='Adversarial Image')
+from torchvision.models import densenet161
+model = densenet161(pretrained=True)
+model.eval()
+new_pred = model(norm(adversarial_img))
+new_predit_id = new_pred.max(dim=1)[1].item()
+print('Original class: ', imagenet_classes[new_predit_id])
+print('Original class probability: {}'.format(nn.Softmax(dim=1)(new_pred)[0,new_predit_id].item()))
+plot_figure(adversarial_img, new_pred, correct_class=predit_id, target_class=new_adv_predict_id, pars=None, img_name='Image')
+
+model = resnet152(pretrained=True)
+model.eval()
+
+epsilon = 4./255
+delta = torch.zeros_like(img_tensor, requires_grad=True)
+opt = optim.Adam([delta], lr=1e-3)
+input_img = copy.deepcopy(img_tensor)
+# id = 9: ostrich
+for i in range(100):
+    adv_pred = model(norm(input_img + delta))
+    loss = (-nn.CrossEntropyLoss()(adv_pred, torch.LongTensor([predit_id]))
+            +nn.CrossEntropyLoss()(adv_pred, torch.LongTensor([9]))
+           )
+    if i % 10 == 0:
+        print(i, -loss.item())
+    opt.zero_grad()
+    loss.backward()
+    opt.step()
+    delta.data.clamp_(-epsilon, epsilon)
+adversarial_img = input_img + delta
+
+new_adv_predict_id = adv_pred.max(dim=1)[1].item()
+plot_figure(adversarial_img, adv_pred, correct_class=predit_id, target_class=new_adv_predict_id, pars=None, img_name='Adversarial Image')
+
+
