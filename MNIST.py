@@ -138,7 +138,7 @@ imported_graph.restore(sess,"Saved_Models/mnist.ckpt")
 
 #x = tf.get_collection('x')[0]
 '''
-########################
+
 
 
 # Fetch 10 4's images
